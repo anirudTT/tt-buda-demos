@@ -19,44 +19,20 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up ignored files
-        run: |
-          # Define ignored files as a multi-line string
-          echo "ignored_files=\
-          file1.py \
-          file2.py" >> $GITHUB_ENV
-
       - name: Identify currently changed files and check licenses
         id: check-licenses
         run: |
           current_year=$(date +"%Y")  # Dynamically set current year for checking
           echo "current_year=$current_year" >> $GITHUB_ENV  # Export current year to environment variables
-          ignored_files=($ignored_files)  # Convert ignored files string to array
           missing_license_files=""
-          echo "Checking for license compliance..."
           for file in $(git diff --name-only HEAD^ HEAD | grep '\.py$'); do
-            if [[ ! " ${ignored_files[@]} " =~ " ${file} " ]]; then  # Check if file is not in the ignored list
-              # Check if file contains the correct SPDX license identifier and the exact copyright statement with dynamic current year
-              if ! grep -q "SPDX-License-Identifier: Apache-2.0" "$file"; then
-                echo "File $file is missing SPDX-License-Identifier."
-                missing_license_files="$missing_license_files$file "
-              elif ! grep -q "SPDX-FileCopyrightText: © $current_year Tenstorrent AI ULC" "$file"; then
-                echo "File $file is missing or has incorrect SPDX-FileCopyrightText."
-                missing_license_files="$missing_license_files$file "
-              else
-                echo "File $file passed license check."
-              fi
-            else
-              echo "File $file is ignored."
+            # Check if file contains the correct SPDX license identifier and the exact copyright statement with dynamic current year
+            if ! grep -q "SPDX-License-Identifier: Apache-2.0" "$file" || ! grep -q "SPDX-FileCopyrightText: © $current_year Tenstorrent AI ULC" "$file"; then
+              missing_license_files="$missing_license_files$file "
             fi
           done
-          if [[ -z "$missing_license_files" ]]; then
-            echo "All files passed the license check."
-          else
-            echo "missing_license_files=$missing_license_files" >> $GITHUB_ENV
-            echo "Some files failed the license check."
-          fi
-          echo "License compliance check completed."
+          echo "missing_license_files=$missing_license_files" >> $GITHUB_ENV
+          echo "Checked files for correct SPDX-License compliance."
 
       - name: Comment on PR about incorrect SPDX licenses
         if: env.missing_license_files != ''
