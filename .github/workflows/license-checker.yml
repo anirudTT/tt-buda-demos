@@ -30,37 +30,39 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            const { execSync } = require('child_process');
-            const core = require('@actions/core');
-            const github = require('@actions/github');
-            
-            // Command to check for license headers
-            const command = `python -m check_copyright --verbose --dry-run --replace --config ./check_copyright_config.yaml . | awk '/Some files are without a copyright note and a license header needs to be added:/{flag=1; next} /Additional information about this hook and copyright headers may be found here:/{flag=0} flag'`;
-            let output;
-            try {
-              // Execute the command
-              output = execSync(command, { encoding: 'utf-8' }); // captures stdout
-            } catch (error) {
-              output = error.stdout; // captures stdout from the error, if command execution fails
-            }
+            (async () => {
+              const { execSync } = require('child_process');
+              const core = require('@actions/core');
+              const github = require('@actions/github');
 
-            // Remove ANSI color codes and prepare the output
-            output = output.replace(/\u001b\[.*?m/g, '');
-            const formattedOutput = output.split('\n').filter(line => line.trim() !== '').map(line => `- ${line}`).join('\n');
+              // Command to check for license headers
+              const command = `python -m check_copyright --verbose --dry-run --replace --config ./check_copyright_config.yaml . | awk '/Some files are without a copyright note and a license header needs to be added:/{flag=1; next} /Additional information about this hook and copyright headers may be found here:/{flag=0} flag'`;
+              let output;
+              try {
+                // Execute the command
+                output = execSync(command, { encoding: 'utf-8' }); // captures stdout
+              } catch (error) {
+                output = error.stdout; // captures stdout from the error, if command execution fails
+              }
 
-            const issueNumber = github.context.issue.number;
-            const owner = github.context.repo.owner;
-            const repo = github.context.repo.repo;
+              // Remove ANSI color codes and prepare the output
+              output = output.replace(/\u001b\[.*?m/g, '');
+              const formattedOutput = output.split('\n').filter(line => line.trim() !== '').map(line => `- ${line}`).join('\n');
 
-            if (formattedOutput) {
-              const commentBody = `PYTHON ENV: Our automated SPDX license verification process has discovered that the following files are missing a license header:\n\`\`\`\n${formattedOutput}\n\`\`\`\nPlease ensure each indicated file includes a valid SPDX license identifier. This is essential for maintaining licensing compliance. Your attention and cooperation in updating these files are greatly appreciated. Thank you.`;
-              await github.rest.issues.createComment({
-                issue_number: issueNumber,
-                owner: owner,
-                repo: repo,
-                body: commentBody
-              });
-              core.setFailed("SPDX license issues found.");
-            } else {
-              console.log("No SPDX license issues found.");
-            }
+              const issueNumber = github.context.issue.number;
+              const owner = github.context.repo.owner;
+              const repo = github.context.repo.repo;
+
+              if (formattedOutput) {
+                const commentBody = `PYTHON ENV: Our automated SPDX license verification process has discovered that the following files are missing a license header:\n\`\`\`\n${formattedOutput}\n\`\`\`\nPlease ensure each indicated file includes a valid SPDX license identifier. This is essential for maintaining licensing compliance. Your attention and cooperation in updating these files are greatly appreciated. Thank you.`;
+                await github.rest.issues.createComment({
+                  issue_number: issueNumber,
+                  owner: owner,
+                  repo: repo,
+                  body: commentBody
+                });
+                core.setFailed("SPDX license issues found.");
+              } else {
+                console.log("No SPDX license issues found.");
+              }
+            })();
