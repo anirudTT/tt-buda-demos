@@ -26,6 +26,5 @@ ignore: # You can also select ignoring files here
   include:
     - .github/*
     - __pycache__
-    - /benchmark/models/falcon/utils/configuration_RW.py
     - /CONTRIBUTING.md
     - /MAINTAINERS.md
