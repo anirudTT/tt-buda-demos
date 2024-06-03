@@ -35,7 +35,6 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            const fs = require('fs');
             const output = process.env.clean_output;
             const failedFilesRegex = /Files which failed the copyright check:[\s\S]*?Additional information about this hook and copyright headers may be found here:/;
             const failedFilesMatch = output.match(failedFilesRegex);
@@ -43,6 +42,7 @@ jobs:
               const failedFiles = failedFilesMatch[0]
                 .replace('Files which failed the copyright check:', '')
                 .replace('Additional information about this hook and copyright headers may be found here:', '')
+                .replace(/Some files are without a copyright note and a license header needs to be added:/, '')
                 .trim()
                 .split('\n')
                 .map(file => file.trim())
