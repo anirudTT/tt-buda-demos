@@ -30,7 +30,7 @@ jobs:
           echo "exit_code=$exit_code" >> $GITHUB_ENV
           exit 0
       - name: Add PR comment
-        if: github.event.pull_request.head.ref == 'main'
+        if: github.event_name == 'pull_request'
         uses: actions/github-script@v6
         with:
           script: |
@@ -41,13 +41,16 @@ jobs:
               const failedFiles = failedFilesMatch[0]
                 .replace('Files which failed the copyright check:', '')
                 .replace('Some files are without a copyright note', '')
-                .trim();
-              const filesToComment = failedFiles.split('\n').map(file => file.trim()).join('\n');
+                .trim()
+                .split('\n')
+                .map(file => file.trim())
+                .filter(file => file !== '');
+              const filesToComment = failedFiles.join('\n');
               github.rest.issues.createComment({
                 issue_number: context.issue.number,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                body: `The following file(s) failed the copyright check:\n\`\`\`\n${filesToComment}\n\`\`\`\n\nAdditional information about this hook and copyright headers may be found here:\nhttps://docs.espressif.com/projects/esp-idf/en/latest/esp32/contribute/copyright-guide.html`
+                body: `The following files do not have and failed the copyright check:\n\`\`\`\n${filesToComment}\n\`\`\``
               });
             }
             if (process.env.exit_code != 0) {
