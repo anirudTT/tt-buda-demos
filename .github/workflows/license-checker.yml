@@ -23,9 +23,9 @@ jobs:
           set +e
           output=$(python -m check_copyright --verbose --dry-run --config ./check_copyright_config.yaml . 2>&1)
           exit_code=$?
-          echo "$output" | sed 's/\x1b\[[0-9;]*m//g' > clean_output.txt
+          echo "$output"
           echo "output<<EOF" >> $GITHUB_ENV
-          cat clean_output.txt >> $GITHUB_ENV
+          echo "$output" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
           echo "exit_code=$exit_code" >> $GITHUB_ENV
           exit 0
@@ -34,8 +34,7 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            const fs = require('fs');
-            const output = fs.readFileSync(process.env.GITHUB_ENV, 'utf8');
+            const output = process.env.output;
             const failedFilesRegex = /Files which failed the copyright check:[\s\S]*?Some files are without a copyright note/;
             const failedFilesMatch = output.match(failedFilesRegex);
             if (failedFilesMatch) {
