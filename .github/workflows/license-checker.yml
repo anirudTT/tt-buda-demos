@@ -30,12 +30,11 @@ jobs:
           echo "exit_code=$exit_code" >> $GITHUB_ENV
           exit 0
       - name: Add PR comment
-        if: github.event_name == 'pull_request'
+        if: github.event.pull_request.head.ref == 'main'
         uses: actions/github-script@v6
         with:
           script: |
             const output = process.env.output;
-            const exitCode = process.env.exit_code;
             const failedFilesRegex = /Files which failed the copyright check:[\s\S]*?Some files are without a copyright note/;
             const failedFilesMatch = output.match(failedFilesRegex);
             if (failedFilesMatch) {
@@ -48,9 +47,9 @@ jobs:
                 issue_number: context.issue.number,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                body: `The following files do not have and failed the copyright check:\n\`\`\`\n${filesToComment}\n\`\`\``
+                body: `The following file(s) failed the copyright check:\n\`\`\`\n${filesToComment}\n\`\`\`\n\nAdditional information about this hook and copyright headers may be found here:\nhttps://docs.espressif.com/projects/esp-idf/en/latest/esp32/contribute/copyright-guide.html`
               });
             }
-            if (exitCode != 0) {
-              core.setFailed(`Check SPDX licenses failed with exit code ${exitCode}`);
+            if (process.env.exit_code != 0) {
+              core.setFailed(`Check SPDX licenses failed with exit code ${process.env.exit_code}`);
             }
