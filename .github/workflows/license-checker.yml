@@ -20,12 +20,13 @@ jobs:
       - name: Check SPDX licenses
         id: check_spdx_licenses
         run: |
+          set +e
           output=$(python -m check_copyright --verbose --dry-run --config ./check_copyright_config.yaml . 2>&1)
+          exit_code=$?
           echo "$output"
           echo "output<<EOF" >> $GITHUB_ENV
           echo "$output" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
-          exit_code=$?
           echo "exit_code=$exit_code" >> $GITHUB_ENV
           exit 0
       - name: Add PR comment
