@@ -10,7 +10,6 @@ DEFAULT:
   new_notice_python: |
     """
     SPDX-FileCopyrightText: © {years} Tenstorrent AI ULC
-
     SPDX-License-Identifier: {license}
     """
 
