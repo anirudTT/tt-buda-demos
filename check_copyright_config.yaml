@@ -4,6 +4,7 @@ DEFAULT:
   # List of allowed licenses for files in this section
   allowed_licenses:
     - Apache-2.0
+    - MIT
 
   license_for_new_files: Apache-2.0  # License to be used when inserting a new copyright notice
 
