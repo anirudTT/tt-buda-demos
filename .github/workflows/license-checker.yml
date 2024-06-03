@@ -25,12 +25,16 @@ jobs:
           echo "output<<EOF" >> $GITHUB_ENV
           echo "$output" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
+          exit_code=$?
+          echo "exit_code=$exit_code" >> $GITHUB_ENV
+          exit 0
       - name: Add PR comment
         if: github.event_name == 'pull_request'
         uses: actions/github-script@v6
         with:
           script: |
             const output = process.env.output;
+            const exitCode = process.env.exit_code;
             const failedFilesRegex = /Files which failed the copyright check:[\s\S]*?Some files are without a copyright note/;
             const failedFilesMatch = output.match(failedFilesRegex);
             if (failedFilesMatch) {
@@ -45,4 +49,7 @@ jobs:
                 repo: context.repo.repo,
                 body: `The following files do not have and failed the copyright check:\n\`\`\`\n${filesToComment}\n\`\`\``
               });
+            }
+            if (exitCode != 0) {
+              core.setFailed(`Check SPDX licenses failed with exit code ${exitCode}`);
             }
