@@ -4,12 +4,13 @@ DEFAULT:
   # List of allowed licenses for files in this section
   allowed_licenses:
     - Apache-2.0
-    - MIT
+
   license_for_new_files: Apache-2.0  # License to be used when inserting a new copyright notice
 
   new_notice_python: |
     """
-    SPDX-FileCopyrightText: © {years} Tenstorrent AI ULC
+    SPDX-FileCopyrightText: © {years} Tenstorrent Inc.
+    
     SPDX-License-Identifier: {license}
     """
 
@@ -20,11 +21,10 @@ DEFAULT:
   include:
     - "*.py"
 
-# ignore:  # You can also select ignoring files here
-#   perform_check: no  # Don't check files from that block
-#   include:
-#     - .github/*
-#     - __pycache__
-#     - /benchmark/models/falcon/utils/configuration_RW.py
-#     - /CONTRIBUTING.md
-#     - /MAINTAINERS.md
+ignore:  # You can also select ignoring files here
+  perform_check: no  # Don't check files from that block
+  include:
+    - .github/*
+    - /CONTRIBUTING.md
+    - /MAINTAINERS.md
+    - ./model_demos/requirements-dev.txt
