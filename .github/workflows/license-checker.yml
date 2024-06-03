@@ -1,3 +1,5 @@
+name: Check SPDX Licenses
+
 on:
   workflow_dispatch:
   workflow_call:
@@ -16,4 +18,31 @@ jobs:
       - name: Install check-copyright
         run: pip install git+https://github.com/espressif/check-copyright.git@master
       - name: Check SPDX licenses
-        run: python -m check_copyright --verbose --dry-run --config ./check_copyright_config.yaml .
+        id: check_spdx_licenses
+        run: |
+          output=$(python -m check_copyright --verbose --dry-run --config ./check_copyright_config.yaml . 2>&1)
+          echo "$output"
+          echo "output<<EOF" >> $GITHUB_ENV
+          echo "$output" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+      - name: Add PR comment
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const output = process.env.output;
+            const failedFilesRegex = /Files which failed the copyright check:[\s\S]*?Some files are without a copyright note/;
+            const failedFilesMatch = output.match(failedFilesRegex);
+            if (failedFilesMatch) {
+              const failedFiles = failedFilesMatch[0]
+                .replace('Files which failed the copyright check:', '')
+                .replace('Some files are without a copyright note', '')
+                .trim();
+              const filesToComment = failedFiles.split('\n').map(file => file.trim()).join('\n');
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: `The following files do not have and failed the copyright check:\n\`\`\`\n${filesToComment}\n\`\`\``
+              });
+            }
