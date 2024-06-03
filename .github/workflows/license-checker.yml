@@ -35,14 +35,8 @@ jobs:
         with:
           script: |
             const output = process.env.output;
-            const ansiRegex = new RegExp([
-              '[\\u001B\\u009B][[\\]()#;?]*',
-              '(?:(?:[a-zA-Z\\d]*(?:;[a-zA-Z\\d]*)*)?\\u0007)',
-              '(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PR-TZcf-nq-uy=><~])'
-            ].join('|'), 'g');
-            const cleanOutput = output.replace(ansiRegex, '');
             const failedFilesRegex = /Files which failed the copyright check:[\s\S]*?Some files are without a copyright note/;
-            const failedFilesMatch = cleanOutput.match(failedFilesRegex);
+            const failedFilesMatch = output.match(failedFilesRegex);
             if (failedFilesMatch) {
               const failedFiles = failedFilesMatch[0]
                 .replace('Files which failed the copyright check:', '')
