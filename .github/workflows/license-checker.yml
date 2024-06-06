@@ -32,18 +32,19 @@ jobs:
           exit_code=$?
           clean_output=$(echo "$output" | sed 's/\x1b\[[0-9;]*m//g')
           echo "$clean_output"
-          echo "clean_output<<EOF" >> $GITHUB_ENV
+          echo "CLEAN_OUTPUT<<EOF" >> $GITHUB_ENV
           echo "$clean_output" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
-          echo "exit_code=$exit_code" >> $GITHUB_ENV
+          echo "EXIT_CODE=$exit_code" >> $GITHUB_ENV
           exit 0
 
   display-clean-output:
     needs: check-spdx-licenses
     runs-on: ubuntu-20.04
     steps:
-      - name: Log Clean output and Exit Code
+      - name: Display clean output
+        shell: /usr/bin/bash -e {0}
         run: |
           echo "Clean Output:"
-          echo "$clean_output"
-          echo "Exit Code: $exit_code"
+          echo "${{ env.CLEAN_OUTPUT }}"
+          echo "Exit Code: ${{ env.EXIT_CODE }}"
