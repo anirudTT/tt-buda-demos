@@ -36,24 +36,54 @@ jobs:
           echo "EOF" >> $GITHUB_ENV
           echo "exit_code=$exit_code" >> $GITHUB_ENV
           exit 0
+      - name: Process output and set GitHub environment variable
+        id: process-output
+        run: |
+          const fs = require('fs');
+          const core = require('@actions/core');
+          const output = process.env.clean_output;
+          const failedFilesRegex = /Files which failed the copyright check:[\s\S]*?Additional information about this hook and copyright headers may be found here:/;
+          const failedFilesMatch = output.match(failedFilesRegex);
+          if (failedFilesMatch) {
+            const failedFiles = failedFilesMatch[0]
+              .replace('Files which failed the copyright check:', '')
+              .replace('Additional information about this hook and copyright headers may be found here:', '')
+              .replace(/Some files are without a copyright note and a license header needs to be added:/, '')
+              .trim()
+              .split('\n')
+              .map(file => file.trim())
+              .filter(file => file !== '');
+            const filesToComment = failedFiles.join('\n');
+            
+            // Append to GITHUB_ENV file
+            fs.appendFileSync(process.env.GITHUB_ENV, `FILES_TO_COMMENT=${filesToComment}\n`);
+          }
+        env:
+          clean_output: ${{ env.clean_output }}
+        shell: node
+
       - name: Add PR comment
         if: github.event_name == 'pull_request'
         uses: actions/github-script@v6
         with:
           script: |
-            const output = process.env.clean_output;
-            const failedFilesRegex = /Files which failed the copyright check:[\s\S]*?Additional information about this hook and copyright headers may be found here:/;
-            const failedFilesMatch = output.match(failedFilesRegex);
-            if (failedFilesMatch) {
-              const failedFiles = failedFilesMatch[0]
-                .replace('Files which failed the copyright check:', '')
-                .replace('Additional information about this hook and copyright headers may be found here:', '')
-                .replace(/Some files are without a copyright note and a license header needs to be added:/, '')
-                .trim()
-                .split('\n')
-                .map(file => file.trim())
-                .filter(file => file !== '');
-              const filesToComment = failedFiles.join('\n');
+            const github = require('@actions/github');
+            const core = require('@actions/core');
+            const formattedOutput = process.env.FILES_TO_COMMENT;
+            const context = github.context;
+            const issueNumber = context.issue.number;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
 
-              # store into github env
-              
+            if (formattedOutput) {
+              const commentBody = `Our automated SPDX license verification process has discovered that the following files are missing a license header:\n\`\`\`\n${formattedOutput}\n\`\`\`\nPlease ensure each indicated file includes a valid SPDX license identifier. This is essential for maintaining licensing compliance. Your attention and cooperation in updating these files are greatly appreciated. Thank you.`;
+              await github.rest.issues.createComment({
+                issue_number: issueNumber,
+                owner: owner,
+                repo: repo,
+                body: commentBody
+              });
+              core.setFailed("SPDX license issues found.");
+            } else {
+              console.log("No SPDX license issues found.");
+            }
