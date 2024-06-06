@@ -30,3 +30,4 @@ ignore:  # You can also select ignoring files here
     - /MAINTAINERS.md
     - ./model_demos/requirements-dev.txt
     - ./model_demos/nlp_demos/falcon/utils/configuration_RW.py
+    - /tt-buda-demos/model_demos/nlp_demos/falcon/utils/configuration_RW.py
