@@ -6,6 +6,12 @@ on:
   pull_request:
     branches:
       - "main"
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - assigned
+      - review_requested
 
 jobs:
   check-spdx-licenses:
@@ -14,7 +20,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5.0.0
         with:
-          cache: 'pip'
+          cache: "pip"
       - name: Install check-copyright
         run: pip install git+https://github.com/espressif/check-copyright.git@master
       - name: Check SPDX licenses
