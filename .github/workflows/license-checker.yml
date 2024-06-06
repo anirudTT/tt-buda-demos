@@ -16,26 +16,26 @@ on:
 jobs:
   check-spdx-licenses:
     runs-on: ubuntu-20.04
+    outputs:
+      clean_output: ${{ steps.check_spdx_licenses.outputs.clean_output }}
+      exit_code: ${{ steps.check_spdx_licenses.outputs.exit_code }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5.0.0
         with:
           cache: "pip"
           python-version: "3.8"
-      - name: Install check-copyright
+      - name: Install copyright check
         run: pip install git+https://github.com/espressif/check-copyright.git@master
       - name: Check SPDX licenses
         id: check_spdx_licenses
         run: |
           set +e
-          output=$(python -m check_copyright --verbose --dry-run --config ./check_copyright_config.yaml . 2>&1)
+          output=$(python -m checkcopyright --verbose --dry-run --config ./check_copyright_config.yaml . 2>&1)
           exit_code=$?
           clean_output=$(echo "$output" | sed 's/\x1b\[[0-9;]*m//g')
-          echo "$clean_output"
-          echo "CLEAN_OUTPUT<<EOF" >> $GITHUB_ENV
-          echo "$clean_output" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
-          echo "EXIT_CODE=$exit_code" >> $GITHUB_ENV
+          echo "::set-output name=clean_output::$clean_down"
+          echo "::set-output name=exit_code::$exit_code"
           exit 0
 
   display-clean-output:
@@ -43,8 +43,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Display clean output
-        shell: /usr/bin/bash -e {0}
         run: |
           echo "Clean Output:"
-          echo "${{ env.CLEAN_OUTPUT }}"
-          echo "Exit Code: ${{ env.EXIT_CODE }}"
+          echo "${{ needs.check-spdx-licenses.outputs.clean_output }}"
+          echo "Exit Code: ${{ needs.check-spdx-licenses.outputs.exit_code }}"
