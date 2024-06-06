@@ -58,8 +58,6 @@ jobs:
               const filesToComment = failedFiles.join('\n');
               core.exportVariable('FILES_TO_COMMENT', filesToComment);
             }
-        env:
-          clean_output: ${{ env.clean_output }}
 
       - name: Add PR comment
         if: github.event_name == 'pull_request'
@@ -85,4 +83,3 @@ jobs:
               core.setFailed("SPDX license issues found.");
             } else {
               console.log("No SPDX license issues found.");
-            }
