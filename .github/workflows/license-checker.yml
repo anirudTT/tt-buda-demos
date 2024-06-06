@@ -42,7 +42,6 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const core = require('@actions/core');
             const context = github.context;
             const output = process.env.clean_output;
             const failedFilesRegex = /Files which failed the copyright check:[\s\S]*?Additional information about this hook and copyright headers may be found here:/;
