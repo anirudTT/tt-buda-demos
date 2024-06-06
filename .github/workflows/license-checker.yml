@@ -42,8 +42,8 @@ jobs:
     needs: check-spdx-licenses
     runs-on: ubuntu-20.04
     steps:
-      - name: Display clean output
+      - name: Log Clean output and Exit Code
         run: |
           echo "Clean Output:"
           echo "$clean_output"
-          ehco "Exit Code: $exit_code"
+          echo "Exit Code: $exit_code"
