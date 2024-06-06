@@ -57,6 +57,7 @@ jobs:
                 .map(file => file.trim())
                 .filter(file => file !== '');
               const filesToComment = failedFiles.join('\n');
+              echo "Files to comment &&&&@#%^@%#^@%#^: $filesToComment";
               if (filesToComment) {
                 const commentBody = `The following files are not compliant with the required licensing standards:\n\`\`\`\n${filesToComment}\n\`\`\`\nPlease update the license header within them. Your attention and cooperation in this matter are greatly appreciated.\nThank you.`;
                 await github.rest.issues.createComment({
