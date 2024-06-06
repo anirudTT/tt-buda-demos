@@ -37,8 +37,18 @@ jobs:
           echo "EOF" >> $GITHUB_ENV
           echo "EXIT_CODE=$exit_code" >> $GITHUB_ENV
           exit 0
-      - name: Debug
+      - name: Extract Files
+        id: extract_files
         run: |
-          echo "Clean Output:"
-          echo "${{ env.CLEAN_OUTPUT }}"
-          echo "Exit Code: ${{ env.EXIT_CODE }}"
+          if echo "${{ env.CLEAN_OUTPUT }}" | grep -q "Files which failed the copyright check:"; then
+            files=$(echo "${{ env.CLEAN_OUTPUT }}" | awk '/Files which failed the copyright check:/,/Additional information about this hook and copyright headers may be found here:/' | sed '1d;$d')
+          else
+            files=$(echo "${{ env.CLEAN_OUTPUT }}" | awk '/Some files are without a copyright note and a license header needs to be added:/,/Additional information about this hook and copyright headers may be found here:/' | sed '1d;$d')
+          fi
+          echo "FILES<<EOF" >> $GITHUB_ENV
+          echo "$files" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+      - name: Debug Extracted Files
+        run: |
+          echo "Extracted Files:"
+          echo "${{ env.FILES }}"
