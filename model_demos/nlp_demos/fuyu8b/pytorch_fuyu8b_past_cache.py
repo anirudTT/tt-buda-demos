@@ -1,3 +1,4 @@
+# SPDX-FileCopyrightText: © 2024 Tenstorrent AI ULC
 
 
 # Fuyu8b Demo - Conditional Generation
