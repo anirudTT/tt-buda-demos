@@ -21,6 +21,7 @@ jobs:
       - uses: actions/setup-python@v5.0.0
         with:
           cache: "pip"
+          python-version: "3.8"
       - name: Install check-copyright
         run: pip install git+https://github.com/espressif/check-copyright.git@master
       - name: Check SPDX licenses
@@ -36,13 +37,11 @@ jobs:
           echo "EOF" >> $GITHUB_ENV
           echo "exit_code=$exit_code" >> $GITHUB_ENV
           exit 0
-
-      - name: Process output and set GitHub environment variable
-        id: process-output
-        uses: actions/github-script@v6
+      - name: Add PR comment
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
         with:
           script: |
-            const core = require('@actions/core');
             const output = process.env.clean_output;
             const failedFilesRegex = /Files which failed the copyright check:[\s\S]*?Additional information about this hook and copyright headers may be found here:/;
             const failedFilesMatch = output.match(failedFilesRegex);
@@ -56,27 +55,12 @@ jobs:
                 .map(file => file.trim())
                 .filter(file => file !== '');
               const filesToComment = failedFiles.join('\n');
-              core.exportVariable('FILES_TO_COMMENT', filesToComment);
-            }
-
-      - name: Add PR comment
-        if: github.event_name == 'pull_request'
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const github = require('@actions/github');
-            const context = github.context;
-            const formattedOutput = process.env.FILES_TO_COMMENT;
-            const issueNumber = context.issue.number;
-            const owner = context.repo.owner;
-            const repo = context.repo.repo;
-
-            if (formattedOutput) {
-              const commentBody = `Our automated SPDX license verification process has discovered that the following files are missing a license header:\n\`\`\`\n${formattedOutput}\n\`\`\`\nPlease ensure each indicated file includes a valid SPDX license identifier. This is essential for maintaining licensing compliance. Your attention and cooperation in updating these files are greatly appreciated. Thank you.`;
-              await github.rest.issues.createComment({
-                issue_number: issueNumber,
-                owner: owner,
-                repo: repo,
+              if (filesToComment){
+              const commentBody= `The following files are not compliant with the required licensing standards :\n\`\`\`\n${filesToComment}\n\`\`\` \nPlease update the license header within them. Your attention and cooperation in this matter are greatly appreciated.\nThank you.`;
+              await github.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
                 body: commentBody
               });
               core.setFailed("SPDX license issues found.");
