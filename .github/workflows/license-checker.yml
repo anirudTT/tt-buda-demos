@@ -65,7 +65,6 @@ jobs:
         with:
           script: |
             const github = require('@actions/github');
-            const core = require('@actions/core');
             const context = github.context;
             const formattedOutput = process.env.FILES_TO_COMMENT;
             const issueNumber = context.issue.number;
@@ -83,3 +82,4 @@ jobs:
               core.setFailed("SPDX license issues found.");
             } else {
               console.log("No SPDX license issues found.");
+            }
