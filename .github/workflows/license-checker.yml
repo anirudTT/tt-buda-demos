@@ -15,7 +15,7 @@ on:
 
 jobs:
   check-spdx-licenses:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5.0.0
@@ -37,3 +37,13 @@ jobs:
           echo "EOF" >> $GITHUB_ENV
           echo "exit_code=$exit_code" >> $GITHUB_ENV
           exit 0
+
+  display-clean-output:
+    needs: check-spdx-licenses
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Display clean output
+        run: |
+          echo "Clean Output:"
+          echo "$clean_output"
+          ehco "Exit Code: $exit_code"
