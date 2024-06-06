@@ -51,8 +51,6 @@ jobs:
               .map(file => file.trim())
               .filter(file => file !== '');
             const filesToComment = failedFiles.join('\n');
-            # print the files to comment
-            console.log(filesToComment);
             echo "::set-output name=files-to-comment::$filesToComment";
           }
       - name: Add PR comment for SPDX license issues
