@@ -55,11 +55,21 @@ jobs:
     steps:
       - name: Add PR comment
         uses: actions/github-script@v7
+        env:
+          clean_output: ${{ env.clean_output }}
+          exit_code: ${{ env.exit_code }}
         with:
           script: |
-            const output = process.env.clean_output;
+            const output = process.env.clean_output || "";
+            const exitCode = process.env.exit_code || 0;
+            if (!output) {
+              console.log("No output available for processing.");
+              return;
+            }
+
             const failedFilesRegex = /Files which failed the copyright check:[\s\S]*?Additional information about this hook and copyright headers may be found here:/;
             const failedFilesMatch = output.match(failedFilesRegex);
+
             if (failedFilesMatch) {
               const failedFiles = failedFilesMatch[0]
                 .replace('Files which failed the copyright check:', '')
@@ -69,6 +79,7 @@ jobs:
                 .split('\n')
                 .map(file => file.trim())
                 .filter(file => file !== '');
+
               const filesToComment = failedFiles.join('\n');
               await github.rest.issues.createComment({
                 issue_number: context.issue.number,
@@ -77,6 +88,7 @@ jobs:
                 body: `The following files are not compliant with the required licensing standards:\n\`\`\`\n${filesToComment}\n\`\`\`\nPlease update the license header within them. Your attention and cooperation in this matter are greatly appreciated.\nThank you.`
               });
             }
-            if (process.env.exit_code != 0) {
-              core.setFailed(`Check SPDX licenses failed with exit code ${process.env.exit_code}`);
+
+            if (exitCode != 0) {
+              core.setFailed(`Check SPDX licenses failed with exit code ${exitCode}`);
             }
