@@ -58,7 +58,7 @@ jobs:
                 issue_number: context.issue.number,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                body: `The following files are not compliant with the required licensing standards :\n\`\`\`\n${filesToComment}\n\`\`\` \nPlease update the files accordingly. Your attention and cooperation in this matter are greatly appreciated.\nThank you.`
+                body: `The following files are not compliant with the required licensing standards :\n\`\`\`\n${filesToComment}\n\`\`\` \nPlease update the license header within them. Your attention and cooperation in this matter are greatly appreciated.\nThank you.`
               });
             }
             if (process.env.exit_code != 0) {
