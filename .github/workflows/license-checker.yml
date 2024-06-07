@@ -46,7 +46,7 @@ jobs:
             }
             /Some files are without a copyright note and a license header needs to be added:/, /Additional information about this hook and copyright headers may be found here:/ {
               if ($0 !~ /Some files are without a copyright note and a license header needs to be added:/ && $0 !~ /Additional information about this hook and copyright headers may be found here:/) print
-            }' | sed 's/^ *//' | sed '/^$/d' | grep '^./')
+            }' | sed 's/^ *//' | sed '/^$/d')
           echo "FILES<<EOF" >> $GITHUB_ENV
           echo "$files" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
