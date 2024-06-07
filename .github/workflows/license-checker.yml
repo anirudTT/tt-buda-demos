@@ -42,10 +42,10 @@ jobs:
         run: |
           files=$(echo "${{ env.CLEAN_OUTPUT }}" | awk '
             /Files which failed the copyright check:/, /Additional information about this hook and copyright headers may be found here:/ {
-              if (NR!=1) {print}
+              if ($0 !~ /Files which failed the copyright check:/ && $0 !~ /Additional information about this hook and copyright headers may be found here:/) print
             }
             /Some files are without a copyright note and a license header needs to be added:/, /Additional information about this hook and copyright headers may be found here:/ {
-              if (NR!=1) {print}
+              if ($0 !~ /Some files are without a copyright note and a license header needs to be added:/ && $0 !~ /Additional information about this hook and copyright headers may be found here:/) print
             }' | sed 's/^ *//' | sed '/^$/d')
           echo "FILES<<EOF" >> $GITHUB_ENV
           echo "$files" >> $GITHUB_ENV
