@@ -43,7 +43,7 @@ jobs:
           if echo "${{ env.CLEAN_OUTPUT }}" | grep -q "Files which failed the copyright check:"; then
             files=$(echo "${{ env.CLEAN_OUTPUT }}" | awk '/Files which failed the copyright check:/,/Additional information about this hook and copyright headers may be found here:/' | sed '1d;$d')
           else
-            files=$(echo "${{ env.CLEAN_OUTPUT }}" | awk '/Some files are without a copyright note and a license header needs to be added:/,/Additional information about this hook and copyright headers may be found here:/' | sed '1d;$d')
+            files=$(echo "${{ env.CLEAN_OUTPUT }}" | awk '/./')
           fi
           echo "FILES<<EOF" >> $GITHUB_ENV
           echo "$files" >> $GITHUB_ENV
@@ -52,3 +52,17 @@ jobs:
         run: |
           echo "Extracted Files:"
           echo "${{ env.FILES }}"
+      - name: Create GitHub Comment
+        if: steps.extract_files.outputs.FILES != ''
+        run: |
+          files_list="${{ steps.extract_files.outputs.FILES }}"
+          formattedOutput=$(echo "$files_list" | awk '{$1=$1};1' ORS='\n' | sed '/^$/d')
+          if [ -n "$formattedOutput" ]; then
+            commentBody="Our automated SPDX license verification process has discovered that the following files are missing a license header:\n\`\`\`\n$formattedOutput\n\`\`\`\nPlease ensure each indicated file includes a valid SPDX license identifier. This is essential for maintaining licensing compliance. Your attention and cooperation in updating these files are greatly appreciated. Thank you."
+            curl -s -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -H "Content-Type: application/json" \
+            -d "{\"body\": \"$commentBody\"}" \
+            "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments"
+            exit 1
+          else
+            echo "No SPDX license issues found."
+          fi
