@@ -40,7 +40,7 @@ jobs:
       - name: Extract Files
         id: extract_files
         run: |
-          files=$(echo "${{ env.CLEAN_OUTPUT }}" | awk '/Files which failed the copyright check:/,/Additional information about this hook and copyright headers may be found here:/' | sed '1d;$d' | sed '/Some files are without a copyright note and a license header needs to be added:/d' | sed 's/^ *//')
+          files=$(echo "${{ env.CLEAN_OUTPUT }}" | awk '/Files which failed the copyright check:/,/Additional information about this hook and copyright headers may be found here:/' | sed '1d;$d' | sed '/Some files are without a copyright note and a license header needs to be added:/d' | sed 's/^ *//' || echo "${{ env.CLEAN_OUTPUT }}" | awk '/Some files are without a copyright note and a license header needs to be added:/,/Additional information about this hook and copyright headers may be found here:/' | sed '1d;$d' | sed '/Some files are without a copyright note and a license header needs to be added:/d' | sed 's/^ *//')
           echo "FILES<<EOF" >> $GITHUB_ENV
           echo "$files" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
