@@ -71,7 +71,7 @@ jobs:
           echo "Extracted Paths:"
           echo "$FILES"
           echo "---------------------------------"
-          echo "exit code: $EXIT_CODE"
+        #   echo "exit code: $EXIT_CODE"
     #   - name: Post GitHub Comment
     #     uses: actions/github-script@v6
     #     with:
