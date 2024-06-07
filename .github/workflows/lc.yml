@@ -61,7 +61,7 @@ jobs:
           echo "$FILES"
       - name: Extract File Paths
         run: |
-            files=$(echo "$CLEAN_OUTPUT" | grep '^\./')
+            files=$(echo "$FILES" | grep '^\./')
             echo "FILES<<EOF" >> $GITHUB_ENV
             echo "$files" >> $GITHUB_ENV
             echo "EOF" >> $GHS
