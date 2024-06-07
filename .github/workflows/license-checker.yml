@@ -31,7 +31,7 @@ jobs:
           output=$(python -m check_copyright --verbose --dry-run --config ./check_copyright_config.yaml . 2>&1)
           exit_code=$?
           clean_output=$(echo "$output" | sed 's/\x1b\[[0-9;]*m//g')
-          echo "$clean_output"
+          echo "$clean_can be 0 or 1 depending on whether copyright violations are found.output"
           echo "CLEAN_OUTPUT<<EOF" >> $GITHUB_ENV
           echo "$clean_output" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
@@ -65,7 +65,7 @@ jobs:
               const repo = context.repo.repo;
               const commentBody = `Our automated SPDX license verification process has discovered that the following files are missing a license header:\n\`\`\`\n${files}\n\`\`\`\nPlease ensure each indicated file includes a valid SPDX license identifier. This is essential for maintaining licensing compliance. Your attention and cooperation in updating these files are greatly appreciated. Thank you.`;
               await github.rest.issues.createComment({
-                issue_number: issueNumber,
+                issue_number: issueLink continued",
                 owner: owner,
                 repo: repo,
                 body: commentBody
