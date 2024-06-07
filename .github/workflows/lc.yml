@@ -61,15 +61,16 @@ jobs:
           echo "Extracted Files:"
           echo "$FILES"
       - name: Extract File Paths
-        if : env.FILES != ''
+        if: env.FILES != ''
         run: |
-            # Extract only lines starting with './'
-            files_clean=$(echo "$FILES" | grep '^\./')
+            # Extract lines starting with './' but ignore any paths following "Modified files:" until a stop marker
+            files_clean=$(echo "$FILES" | awk '/^Modified files:/ {ignore = 1} /^Above is a list of files/ {ignore = 0} !ignore && /^\.\// {print}' | sort | uniq)
             # Save the cleaned files into a new environment variable 'FILES_CLEAN'
             echo "FILES_CLEAN<<EOF" >> $GITHUB_ENV
             echo "$files_clean" >> $GITHUB_ENV
             echo "EOF" >> $GITHUB_ENV
             echo "Extracted Paths: $files_clean"
+        
             
       - name: Debug Extracted Paths
         run: |
