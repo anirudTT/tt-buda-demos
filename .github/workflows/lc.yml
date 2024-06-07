@@ -41,19 +41,23 @@ jobs:
         run: |
           echo "Extracted Files:"
           echo "$CLEAN_OUTPUT"
-    #   - name: Extract Files
-    #     id: extract_files
-    #     run: |
-    #       files=$(echo "${{ env.CLEAN_OUTPUT }}" | awk '
-    #         /Files which failed the copyright check:/, /Additional information about this hook and copyright headers may be found here:/ {
-    #           if ($0 !~ /Files which failed the copyright check:/ && $0 !~ /Additional information about this hook and copyright headers may be found here:/) print
-    #         }
-    #         /Some files are without a copyright note and a license header needs to be added:/, /Additional information about this hook and copyright headers may be found here:/ {
-    #           if ($0 !~ /Some files are without a copyright note and a license header needs to be added:/ && $0 !~ /Additional information about this hook and copyright headers may be found here:/) print
-    #         }' | sed 's/^ *//' | sed '/^$/d' | grep '^./')
-    #       echo "FILES<<EOF" >> $GITHUB_ENV
-    #       echo "$files" >> $GITHUB_ENV
-    #       echo "EOF" >> $GITHUB_ENV
+      - name: Extract Files
+        id: extract_files
+        run: |
+          files=$(echo "${{ env.CLEAN_OUTPUT }}" | awk '
+            /Files which failed the copyright check:/, /Additional information about this hook and copyright headers may be found here:/ {
+              if ($0 !~ /Files which failed the copyright check:/ && $0 !~ /Additional information about this hook and copyright headers may be found here:/) print
+            }
+            /Some files are without a copyright note and a license header needs to be added:/, /Additional information about this hook and copyright headers may be found here:/ {
+              if ($0 !~ /Some files are without a copyright note and a license header needs to be added:/ && $0 !~ /Additional information about this hook and copyright headers may be found here:/) print
+            }' | sed 's/^ *//' | sed '/^$/d' | grep '^./')
+          echo "FILES<<EOF" >> $GITHUB_ENV
+          echo "$files" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+      - name: Debug Extracted Files   
+        run: |
+          echo "Extracted Files:"
+          echo "$FILES"
     #   - name: Post GitHub Comment
     #     uses: actions/github-script@v6
     #     with:
