@@ -1,4 +1,3 @@
-
 name: Check SPDX Licenses
 
 on:
@@ -41,13 +40,7 @@ jobs:
       - name: Extract Files
         id: extract_files
         run: |
-          files=$(echo "${{ env.CLEAN_OUTPUT }}" | awk '
-            /Files which failed the copyright check:/, /Additional information about this hook and copyright headers may be found here:/ {
-              if (NR!=1) {print}
-            }
-            /Some files are without a copyright note and a license header needs to be added:/, /Additional information about this hook and copyright headers may be found here:/ {
-              if (NR!=1) {print}
-            }' | sed 's/^ *//' | sed '/^$/d')
+          files=$(echo "${{ env.CLEAN_OUTPUT }}" | awk '/Files which failed the copyright check:/,/Additional information about this hook and copyright headers may be found here:/' | sed '1d;$d' | sed '/Some files are without a copyright note and a license header needs to be added:/d' | sed 's/^ *//')
           echo "FILES<<EOF" >> $GITHUB_ENV
           echo "$files" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
