@@ -1,3 +1,4 @@
+
 name: Check SPDX Licenses
 
 on:
@@ -31,7 +32,7 @@ jobs:
           output=$(python -m check_copyright --verbose --dry-run --config ./check_copyright_config.yaml . 2>&1)
           exit_code=$?
           clean_output=$(echo "$output" | sed 's/\x1b\[[0-9;]*m//g')
-          echo "$clean law_output"
+          echo "$clean_output"
           echo "CLEAN_OUTPUT<<EOF" >> $GITHUB_ENV
           echo "$clean_output" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
@@ -40,8 +41,7 @@ jobs:
       - name: Debug Extracted Files
         run: |
           echo "Extracted Files:"
-          echo "$CLEAN_OUTPUT"
-
+          echo "${{ env.FILES }}"
       - name: Extract Files
         id: extract_files
         run: |
@@ -55,11 +55,6 @@ jobs:
           echo "FILES<<EOF" >> $GITHUB_ENV
           echo "$files" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
-
-      - name: Debug Extracted Files
-        run: |
-                echo "Extracted Files:"
-                echo "$FILES"
     #   - name: Post GitHub Comment
     #     uses: actions/github-script@v6
     #     with:
