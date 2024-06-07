@@ -37,6 +37,11 @@ jobs:
           echo "EOF" >> $GITHUB_ENV
           echo "EXIT_CODE=$exit_code" >> $GITHUB_ENV
           exit 0
+      - name: Debug Output
+        run: |
+          echo "Output:"
+          echo "${{ env.CLEAN_OUTPUT }}"
+          echo "Exit Code: ${{ env.EXIT_CODE }}"
       - name: Extract Files
         id: extract_files
         run: |
