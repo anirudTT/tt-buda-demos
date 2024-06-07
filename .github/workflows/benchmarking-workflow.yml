@@ -1,0 +1,71 @@
+# name: Check SPDX Licenses
+
+# on:
+#   workflow_dispatch:
+#   workflow_call:
+#   pull_request:
+#     branches:
+#       - "main"
+#     types:
+#       - opened
+#       - reopened
+#       - synchronize
+#       - assigned
+#       - review_requested
+
+# jobs:
+#   check-spdx-licenses:
+#     runs-on: ubuntu-20.04
+#     steps:
+#       - uses: actions/checkout@v4
+#       - uses: actions/setup-python@v5.0.0
+#         with:
+#           cache: "pip"
+#           python-version: "3.8"
+#       - name: Install copyright check tool
+#         run: pip install git+https://github.com/espressif/check-copyright.git@master
+#       - name: Check SPDX licenses
+#         id: check_spdx_licenses
+#         run: |
+#           set +e
+#           output=$(python -m check_copyright --verbose --dry-run --config ./check_copyright_config.yaml . 2>&1)
+#           exit_code=$?
+#           clean_output=$(echo "$output" | sed 's/\x1b\[[0-9;]*m//g')
+#           echo "$clean_output"
+#           echo "CLEAN_OUTPUT<<EOF" >> $GITHUB_ENV
+#           echo "$clean_output" >> $GITHUB_ENV
+#           echo "EOF" >> $GITHUB_ENV
+#           echo "EXIT_CODE=$exit_code" >> $GITHUB_ENV
+#           exit 0
+#       - name: Extract Files
+#         id: extract_files
+#         run: |
+#           files=$(echo "${{ env.CLEAN_OUTPUT }}" | awk '/Files which failed the copyright check:/,/Additional information about this hook and copyright headers may be found here:/' | sed '1d;$d')
+#           echo "FILES<<EOF" >> $GITHUB_ENV
+#           echo "$files" >> $GITHUB_ENV
+#           echo "EOF" >> $GITHUB_ENV
+#       - name: Debug Extracted Files
+#         run: |
+#           echo "Extracted Files:"
+#           echo "${{ env.FILES }}"
+#       - name: Post GitHub Comment
+#         uses: actions/github-script@v6
+#         with:
+#           github-token: ${{ secrets.GITHUB_TOKEN }}
+#           script: |
+#             const files = process.env.FILES;
+#             if (files) {
+#               const issueNumber = context.payload.pull_request.number;
+#               const owner = context.repo.owner;
+#               const repo = context.repo.repo;
+#               const commentBody = `Our automated SPDX license verification process has discovered that the following files are missing a license header:\n\`\`\`\n${files}\n\`\`\`\nPlease ensure each indicated file includes a valid SPDX license identifier. This is essential for maintaining licensing compliance. Your attention and cooperation in updating these files are greatly appreciated. Thank you.`;
+#               await github.rest.issues.createComment({
+#                 issue_number: issueNumber,
+#                 owner: owner,
+#                 repo: repo,
+#                 body: commentBody
+#               });
+#               core.setFailed("SPDX license issues found.");
+#             } else {
+#               console.log("No SPDX license issues found.");
+#             }
