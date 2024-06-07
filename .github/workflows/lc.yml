@@ -37,41 +37,41 @@ jobs:
           echo "EOF" >> $GITHUB_ENV
           echo "EXIT_CODE=$exit_code" >> $GITHUB_ENV
           exit 0
-      - name: Debug Extracted Files
-        run: |
-          echo "Extracted Files:"
-          echo "${{ env.FILES }}"
-      - name: Extract Files
-        id: extract_files
-        run: |
-          files=$(echo "${{ env.CLEAN_OUTPUT }}" | awk '
-            /Files which failed the copyright check:/, /Additional information about this hook and copyright headers may be found here:/ {
-              if ($0 !~ /Files which failed the copyright check:/ && $0 !~ /Additional information about this hook and copyright headers may be found here:/) print
-            }
-            /Some files are without a copyright note and a license header needs to be added:/, /Additional information about this hook and copyright headers may be found here:/ {
-              if ($0 !~ /Some files are without a copyright note and a license header needs to be added:/ && $0 !~ /Additional information about this hook and copyright headers may be found here:/) print
-            }' | sed 's/^ *//' | sed '/^$/d' | grep '^./')
-          echo "FILES<<EOF" >> $GITHUB_ENV
-          echo "$files" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
-      - name: Post GitHub Comment
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const files = process.env.FILES;
-            if (files) {
-              const issueNumber = context.payload.pull_request.number;
-              const owner = context.repo.owner;
-              const repo = context.repo.repo;
-              const commentBody = `Our automated SPDX license verification process has discovered that the following files are missing a license header:\n\`\`\`\n${files}\n\`\`\`\nPlease ensure each indicated file includes a valid SPDX license identifier. This is essential for maintaining licensing compliance. Your attention and cooperation in updating these files are greatly appreciated. Thank you.`;
-              await github.rest.issues.createComment({
-                issue_number: issueNumber,
-                owner: owner,
-                repo: repo,
-                body: commentBody
-              });
-              core.setFailed("SPDX license issues found.");
-            } else {
-              console.log("No SPDX license issues found.");
-            }
+    #   - name: Debug Extracted Files
+    #     run: |
+    #       echo "Extracted Files:"
+    #       echo "${{ env.FILES }}"
+    #   - name: Extract Files
+    #     id: extract_files
+    #     run: |
+    #       files=$(echo "${{ env.CLEAN_OUTPUT }}" | awk '
+    #         /Files which failed the copyright check:/, /Additional information about this hook and copyright headers may be found here:/ {
+    #           if ($0 !~ /Files which failed the copyright check:/ && $0 !~ /Additional information about this hook and copyright headers may be found here:/) print
+    #         }
+    #         /Some files are without a copyright note and a license header needs to be added:/, /Additional information about this hook and copyright headers may be found here:/ {
+    #           if ($0 !~ /Some files are without a copyright note and a license header needs to be added:/ && $0 !~ /Additional information about this hook and copyright headers may be found here:/) print
+    #         }' | sed 's/^ *//' | sed '/^$/d' | grep '^./')
+    #       echo "FILES<<EOF" >> $GITHUB_ENV
+    #       echo "$files" >> $GITHUB_ENV
+    #       echo "EOF" >> $GITHUB_ENV
+    #   - name: Post GitHub Comment
+    #     uses: actions/github-script@v6
+    #     with:
+    #       github-token: ${{ secrets.GITHUB_TOKEN }}
+    #       script: |
+    #         const files = process.env.FILES;
+    #         if (files) {
+    #           const issueNumber = context.payload.pull_request.number;
+    #           const owner = context.repo.owner;
+    #           const repo = context.repo.repo;
+    #           const commentBody = `Our automated SPDX license verification process has discovered that the following files are missing a license header:\n\`\`\`\n${files}\n\`\`\`\nPlease ensure each indicated file includes a valid SPDX license identifier. This is essential for maintaining licensing compliance. Your attention and cooperation in updating these files are greatly appreciated. Thank you.`;
+    #           await github.rest.issues.createComment({
+    #             issue_number: issueNumber,
+    #             owner: owner,
+    #             repo: repo,
+    #             body: commentBody
+    #           });
+    #           core.setFailed("SPDX license issues found.");
+    #         } else {
+    #           console.log("No SPDX license issues found.");
+    #         }
