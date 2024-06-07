@@ -28,7 +28,7 @@ jobs:
         id: check_spdx_licenses
         run: |
           set +e
-          output=$(python -m check_copyright --verbose --dry-run --config ./check_copyright_config.yaml .)
+          output=$(python -m check_copyright --verbose --dry-run --config ./check_copyright_config.yaml . 2>&1)
           exit_code=$?
           clean_output=$(echo "$output" | sed 's/\x1b\[[0-9;]*m//g')
           echo "$clean_output"
@@ -40,14 +40,13 @@ jobs:
       - name: Extract Files
         id: extract_files
         run: |
-          echo "${{ env.CLEAN_OUTPUT }}" | awk '
+          files=$(echo "${{ env.CLEAN_OUTPUT }}" | awk '
             /Files which failed the copyright check:/, /Additional information about this hook and copyright headers may be found here:/ {
               if ($0 !~ /Files which failed the copyright check:/ && $0 !~ /Additional information about this hook and copyright headers may be found here:/) print
             }
             /Some files are without a copyright note and a license header needs to be added:/, /Additional information about this hook and copyright headers may be found here:/ {
               if ($0 !~ /Some files are without a copyright note and a license header needs to be added:/ && $0 !~ /Additional information about this hook and copyright headers may be found here:/) print
-            }' | sed 's/^ *//' | sed '/^$/d' > files_list.txt
-          files=$(cat files_list.txt)
+            }' | sed 's/^ *//' | sed '/^$/d' | grep '^./')
           echo "FILES<<EOF" >> $GITHUB_ENV
           echo "$files" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
@@ -56,7 +55,6 @@ jobs:
           echo "Extracted Files:"
           echo "${{ env.FILES }}"
       - name: Post GitHub Comment
-        if: env.FILES != ''
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
