@@ -28,7 +28,7 @@ jobs:
         id: check_spdx_licenses
         run: |
           set +e
-          output=$(python -m check_copyright --verbose --dry-run --config ./check_copyright_config.yaml . 2>&1)
+          output=$(python -m check_copyright --verbose --dry-run --config ./check_copyright_config.yaml .)
           exit_code=$?
           clean_output=$(echo "$output" | sed 's/\x1b\[[0-9;]*m//g')
           echo "$clean_output"
