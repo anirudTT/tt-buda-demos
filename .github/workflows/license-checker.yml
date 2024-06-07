@@ -31,7 +31,6 @@ jobs:
           output=$(python -m check_copyright --verbose --dry-run --config ./check_copyright_config.yaml . 2>&1)
           exit_code=$?
           clean_output=$(echo "$output" | sed 's/\x1b\[[0-9;]*m//g')
-          echo "$clean_output"
           echo "CLEAN_OUTPUT<<EOF" >> $GITHUB_ENV
           echo "$clean_output" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
@@ -47,6 +46,10 @@ jobs:
             /Some files are without a copyright note and a license header needs to be added:/, /Additional information about this hook and copyright headers may be found here:/ {
               if ($0 !~ /Some files are without a copyright note and a license header needs to be added:/ && $0 !~ /Additional information about this hook and copyright headers may be found here:/) print
             }' | sed 's/^ *//' | sed '/^$/d' | grep '^./')
+          if [ -z "$files" ]; then
+            echo "No files with SPDX issues detected."
+            files="No SPDX issues detected"
+          fi
           echo "FILES<<EOF" >> $GITHUB_ENV
           echo "$files" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
@@ -60,7 +63,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const files = process.env.FILES;
-            if (files) {
+            if (files !== "No SPDX issues detected") {
               const issueNumber = context.payload.pull_request.number;
               const owner = context.repo.owner;
               const repo = context.repo.repo;
