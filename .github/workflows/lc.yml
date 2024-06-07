@@ -40,7 +40,7 @@ jobs:
       - name: Debug Extracted Files
         run: |
           echo "Extracted Files:"
-          echo "${{ env.FILES }}"
+          echo "${{ env.CLEAN_OUTPUT }}"
     #   - name: Extract Files
     #     id: extract_files
     #     run: |
